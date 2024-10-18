@@ -1,34 +1,71 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import React, { useState } from 'react';
+import { View, Button, StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
 
-export default function Home({ navigation }) {
-  const handleLogout = async () => {
-    // Xóa token khỏi AsyncStorage
-    await AsyncStorage.removeItem('token');
-    // Chuyển hướng về trang đăng nhập
-    navigation.navigate('Login');
-    Alert.alert('Logged out', 'You have been logged out successfully.');
+const Home = () => {
+  const [profilePicture, setProfilePicture] = useState(null);
+
+  const addProfilePicture = () => {
+    // Logic to add a profile picture (could use an image picker)
+    // For demonstration purposes, we're just using a placeholder image
+    setProfilePicture('https://via.placeholder.com/200');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the Home Screen!</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <Text style={styles.greeting}>Hello!</Text>
+      {profilePicture ? (
+        <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+      ) : (
+        <View style={styles.placeholder}>
+          <Text style={styles.placeholderText}>No Profile Picture</Text>
+        </View>
+      )}
+      <TouchableOpacity style={styles.button} onPress={addProfilePicture}>
+        <Text style={styles.buttonText}>Add Profile Picture</Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f0f0', // Light background
   },
-  title: {
-    fontSize: 24,
+  greeting: {
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
   },
+  profileImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 100, // Circular image
+    marginBottom: 20,
+  },
+  placeholder: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: '#d9d9d9', // Placeholder color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  placeholderText: {
+    color: '#888', // Text color for placeholder
+  },
+  button: {
+    backgroundColor: '#007AFF', // Blue button
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
 });
+
+export default Home;

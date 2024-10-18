@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { CommonActions } from '@react-navigation/native'; // Import CommonActions for resetting navigation
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommonActions } from '@react-navigation/native';
 
 export default function Login({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const API_URL = 'https://locketcouplebe-production.up.railway.app/auth/login'; // Ensure /login is included
+  const API_URL = 'https://locketcouplebe-production.up.railway.app/auth/login';
 
   const handleLogin = async () => {
     // Prepare the payload
@@ -25,15 +25,9 @@ export default function Login({ navigation }) {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        // If response is not ok, throw an error
-        throw new Error('Invalid username or password');
-      }
+      const data = await response.json(); // Parse the JSON response
 
-      const data = await response.json();
-
-      // Check if login was successful based on the response from your API
-      if (data.code === 200 && data.data.authenticated) {
+      if (data.code === 200 && data.data?.authenticated) {
         setMessage('Login successful!');
 
         // Save the token to AsyncStorage
@@ -42,15 +36,25 @@ export default function Login({ navigation }) {
         // Reset the navigation stack and navigate to Home
         navigation.dispatch(
           CommonActions.reset({
-            index: 0, // Set the index to 0 to go to the Home screen
-            routes: [{ name: 'Home' }], // Define the Home route as the only route in the stack
+            index: 0,
+            routes: [{ name: 'Home' }],
           })
         );
+      } else if (data.code === 101) {
+        // Handle user not active case
+        setMessage(data.message); // Set the API message
+        Alert.alert('Error', data.message); // Show the API message
+      } else if (data.code === 401) {
+        // Invalid username/password
+        setMessage(data.message || 'Invalid username or password');
+        Alert.alert('Error', data.message || 'Invalid username or password');
       } else {
-        setMessage('Invalid username or password');
+        // Fallback for other errors
+        setMessage(data.message || 'An error occurred');
+        Alert.alert('Error', data.message || 'An error occurred');
       }
     } catch (error) {
-      // Handle errors
+      // Handle any network or server errors
       setMessage(error.message);
       Alert.alert('Error', error.message); // Display an alert with the error
     }
